@@ -1,90 +1,88 @@
-// A C / C++ program for Dijkstra's single source shortest path algorithm.
-// The program is for adjacency matrix representation of the graph
+#include<iostream>
+#include<algorithm>
+#include<string.h>
+#define inf 0x3f3f3f3f
+#define maxn 1010
+using namespace std;
+bool visit[maxn];
+int dist[maxn];//源点到顶点i的距离
+int mp[maxn][maxn];
+static int n, m;
 
-#include <stdio.h>
-#include <limits.h>
-
-// Number of vertices in the graph
-#define V 9
-
-// A utility function to find the vertex with minimum distance value, from
-// the set of vertices not yet included in shortest path tree
-int minDistance(int dist[], bool sptSet[])
+/* 通过dist数组得出得出当下到源点的最小顶点 */
+int getMin()
 {
-    // Initialize min value
-    int min = INT_MAX, min_index;
-
-    for (int v = 0; v < V; v++)
-        if (sptSet[v] == false && dist[v] <= min)
-            min = dist[v], min_index = v;
-    return min_index;
+	int min = inf;
+	int minIndex = 0;
+	//每组数据第一行包含两个正整数N和M(0<N<200,0<M<1000)，分别代表现有城镇的数目和已修建的道路的数目
+	for (int i = 0; i<n; i++)
+	{
+		if (!visit[i] && dist[i]<min)
+		{
+			min = dist[i];
+			minIndex = i;
+		}
+	}
+	return minIndex;
 }
-
-// A utility function to print the constructed distance array
-int printSolution(int dist[], int n)
+int dijkstra(int src, int end)
 {
-    printf("Vertex Distance from Source\n");
-    for (int i = 0; i < V; i++)
-        printf("%d \t\t %d\n", i, dist[i]);
+	if(src==end)
+		return 0;
+
+	//init
+	for (int j = 0; j<n; j++)
+	{
+		if (mp[src][j] == 0)
+			dist[j] = inf;
+		else
+			dist[j] = mp[src][j];
+	}
+
+	dist[src] = 0;
+	visit[src] = true;
+	
+	//松弛操作
+	for (int i = 0; i < n; i++)
+	{
+		int u = getMin();
+		visit[u] = true;
+		for (int j = 0; j < n; j++)
+		{
+			if (!visit[j] && mp[u][j] != 0 && dist[u] != inf && mp[u][j] + dist[u] < dist[j])
+			{
+				dist[j] = dist[u] + mp[u][j];
+			}
+		}
+	}
+	return dist[end] == inf ? -1 : dist[end];
 }
-
-// Funtion that implements Dijkstra's single source shortest path algorithm
-// for a graph represented using adjacency matrix representation
-void dijkstra(int graph[V][V], int src = 0)
-{
-    int dist[V]; // The output array.  dist[i] will hold the shortest
-                 // distance from src to i
-
-    bool sptSet[V]; // sptSet[i] will true if vertex i is included in shortest
-                    // path tree or shortest distance from src to i is finalized
-
-    // Initialize all distances as INFINITE and stpSet[] as false
-    for (int i = 0; i < V; i++)
-        dist[i] = INT_MAX, sptSet[i] = false;
-
-    // Distance of source vertex from itself is always 0
-    dist[src] = 0;
-
-    // Find shortest path for all vertices
-    for (int count = 0; count < V - 1; count++)
-    {
-        // Pick the minimum distance vertex from the set of vertices not
-        // yet processed. u is always equal to src in first iteration.
-        int u = minDistance(dist, sptSet);
-
-        // Mark the picked vertex as processed
-        sptSet[u] = true;
-
-        // Update dist value of the adjacent vertices of the picked vertex.
-        for (int v = 0; v < V; v++)
-
-            // Update dist[v] only if is not in sptSet, there is an edge from
-            // u to v, and total weight of path from src to  v through u is
-            // smaller than current value of dist[v]
-            if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX && dist[u] + graph[u][v] < dist[v])
-                dist[v] = dist[u] + graph[u][v];
-    }
-
-    // print the constructed distance array
-    printSolution(dist, V);
-}
-
-// driver program to test above function
+//void print()
+//{
+//	cout << "顶点" << "       " << "源点到顶点i的距离" << endl;
+//	for (int i = 0; i<n; i++)
+//	{
+//		cout << i << "          " << dist[i] << endl;
+//	}
+//}
 int main()
 {
-    /* Let us create the example graph discussed above */
-    int graph[V][V] = {{0, 4, 0, 0, 0, 0, 0, 8, 0},
-                       {4, 0, 8, 0, 0, 0, 0, 11, 0},
-                       {0, 8, 0, 7, 0, 4, 0, 0, 2},
-                       {0, 0, 7, 0, 9, 14, 0, 0, 0},
-                       {0, 0, 0, 9, 0, 10, 0, 0, 0},
-                       {0, 0, 4, 14, 10, 0, 2, 0, 0},
-                       {0, 0, 0, 0, 0, 2, 0, 1, 6},
-                       {8, 11, 0, 0, 0, 0, 1, 0, 7},
-                       {0, 0, 2, 0, 0, 0, 6, 7, 0}};
-
-    dijkstra(graph, 0);
-    getchar();
-    getchar();
-    return 0;
+	while ((cin >> n >> m)) {
+		int x, y, z;
+		int start, end;
+		memset(mp, 0, sizeof(mp));
+		memset(visit, false, sizeof(visit));
+		memset(dist, 0, sizeof(dist));
+		for (int i = 0; i<m; i++)
+		{
+			cin >> x >> y >> z;
+			if((!mp[y][x]) || mp[x][y]>z)
+				mp[x][y]=mp[y][x] = z;
+		}
+		cin >> start >> end;
+		int res = dijkstra(start, end);
+		cout << res << endl;
+		//print();
+	}
+	return 0;
 }
