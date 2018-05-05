@@ -1,2 +1,2 @@
-# ACM
-Some simple algorithm
+# Codes
+刷题刷题刷题
